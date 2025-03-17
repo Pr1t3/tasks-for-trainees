@@ -1,33 +1,31 @@
-<?php
-if (!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED !== true) die();
-$this->setFrameMode(true);
-?>
-
 <div class="news-list">
-    <?php foreach ($arResult["ITEMS"] as $arItem): ?>
-        <div class="news-item">
-			<div class="main-info">
-				<h2 class="name">
-					<a href=<?= $arItem["DETAIL_PAGE_URL"] ?>><?= $arItem["NAME"] ?></a>
-				</h2>
-				<p class="preview-text"><?= $arItem["PREVIEW_TEXT"] ?></p>
-				<p class="date"><?= $arItem["DISPLAY_ACTIVE_FROM"] ?></p>
-			</div>
-			<?if($arItem["PREVIEW_PICTURE"]):?>
-			<div class="picture-div">
-				<img
-					class="preview-picture"
-					src="<?=$arItem["PREVIEW_PICTURE"]["SRC"]?>"
-					width="<?=$arItem["PREVIEW_PICTURE"]["WIDTH"]?>"
-					height="<?=$arItem["PREVIEW_PICTURE"]["HEIGHT"]?>"
-					alt="<?=$arItem["PREVIEW_PICTURE"]["ALT"]?>"
-					title="<?=$arItem["PREVIEW_PICTURE"]["TITLE"]?>"
-					/>
-			</div>
-			<?endif?>
+    <div id="barba-wrapper">
+        <div class="article-list">
+            <?foreach($arResult["ITEMS"] as $arItem):?>
+                <?if(!$arParams["HIDE_LINK_WHEN_NO_DETAIL"] || ($arItem["DETAIL_TEXT"] && $arResult["USER_HAVE_ACCESS"])):?>
+                    <a class="article-item article-list__item" href=<?= $arItem["DETAIL_PAGE_URL"]?> data-anim="anim-3">
+                <?else:?>
+                    <div class="article-item article-list__item" data-anim="anim-3">
+                <?endif;?>
+                    <?if($arParams["DISPLAY_PICTURE"]!="N" && is_array($arItem["PREVIEW_PICTURE"])):?>
+                        <div class="article-item__background"><img src=<?= $arItem["PREVIEW_PICTURE"]["SRC"] ?>
+                                data-src="xxxHTMLLINKxxx0.39186223192351520.41491856731872767xxx" alt="" />
+                        </div>
+                    <?endif;?>
+                    <div class="article-item__wrapper">
+                        <?if($arParams["DISPLAY_NAME"]!="N" && $arItem["NAME"]):?>
+                            <div class="article-item__title"><?= $arItem["NAME"]?></div>
+                        <?endif;?>
+                        <?if($arParams["DISPLAY_PREVIEW_TEXT"]!="N" && $arItem["PREVIEW_TEXT"]):?>
+                            <div class="article-item__content"><?= $arItem["PREVIEW_TEXT"] ?></div>
+                        <?endif;?>
+                    </div>
+                <?if(!$arParams["HIDE_LINK_WHEN_NO_DETAIL"] || ($arItem["DETAIL_TEXT"] && $arResult["USER_HAVE_ACCESS"])):?>
+                    </a>
+                <?else:?>
+                    </div>
+                <?endif;?>
+            <?endforeach;?>
         </div>
-		<?if(next($arResult["ITEMS"])):?>
-			<div class="divider-line"></div>
-		<?endif?>
-	<?php endforeach; ?>
+    </div>
 </div>
