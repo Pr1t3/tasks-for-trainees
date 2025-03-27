@@ -19,34 +19,38 @@ if (!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED !== true)
     <?php endif; ?>
 
     <form class="contact-form__form" action="/" method="POST">
+        <input type="hidden" name="WEB_FORM_ID" value="<?=$arParams['WEB_FORM_ID']?>">
+        <input type="hidden" name="web_form_submit" value="Y">
+        <?=bitrix_sessid_post()?>
+
         <div class="contact-form__form-inputs">
             <?if(isset($arResult['arAnswers']['name'])):?>
                 <?$question = $arResult['QUESTIONS']['name'];?>
                 <div class="input contact-form__input">
                     <label class="input__label" for="medicine_name">
                         <div class="input__label-text"><?=$question['CAPTION']?><?=$question['REQUIRED'] === 'Y' ? ' *' : ''?></div>
-                        <input class="input__input" type="text" id="medicine_name" name="medicine_name" value="" required="">
+                        <input class="input__input" type="text" id="medicine_name" name="form_text_<?=$question['STRUCTURE'][0]['ID']?>" value="" required="">
                         <div class="input__notification">Поле должно содержать не менее 3-х символов</div>
                     </label>
                 </div>
             <?endif;?>
             <?if(isset($arResult['arAnswers']['company'])):?>
-                <?$question = $arResult['QUESTIONS']['name'];?>
+                <?$question = $arResult['QUESTIONS']['company'];?>
                 <div class="input contact-form__input">
                     <label class="input__label" for="medicine_company">
                         <div class="input__label-text"><?=$question['CAPTION']?><?=$question['REQUIRED'] === 'Y' ? ' *' : ''?></div>
-                        <input class="input__input" type="text" id="medicine_company" name="medicine_company" value="" required="">
+                        <input class="input__input" type="text" id="medicine_company" name="form_text_<?=$question['STRUCTURE'][0]['ID']?>" value="" required="">
                         <div class="input__notification">Поле должно содержать не менее 3-х символов</div>
                     </label>
                 </div>
             <?endif;?>
             
-            <?if(isset($arResult['arAnswers']['company'])):?>
-                <?$question = $arResult['QUESTIONS']['company'];?>
+            <?if(isset($arResult['arAnswers']['email'])):?>
+                <?$question = $arResult['QUESTIONS']['email'];?>
                 <div class="input contact-form__input">
                         <label class="input__label" for="medicine_email">
                         <div class="input__label-text"><?=$question['CAPTION']?><?=$question['REQUIRED'] === 'Y' ? ' *' : ''?></div>
-                        <input class="input__input" type="email" id="medicine_email" name="medicine_email" value="" required="">
+                        <input class="input__input" type="email" id="medicine_email" name="form_email_<?=$question['STRUCTURE'][0]['ID']?>" value="" required="">
                         <div class="input__notification">Неверный формат почты</div>
                     </label>
                 </div>
@@ -58,7 +62,7 @@ if (!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED !== true)
                         <div class="input__label-text"><?=$question['CAPTION']?><?=$question['REQUIRED'] === 'Y' ? ' *' : ''?></div>
                         <input class="input__input" type="tel" id="medicine_phone"
                             data-inputmask="'mask': '+79999999999', 'clearIncomplete': 'true'" maxlength="12"
-                            x-autocompletetype="phone-full" name="medicine_phone" value="" required="">
+                            x-autocompletetype="phone-full" name="form_text_<?=$question['STRUCTURE'][0]['ID']?>" value="" required="">
                     </label>
                 </div>
             <?endif;?>
@@ -68,7 +72,7 @@ if (!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED !== true)
             <div class="contact-form__form-message">
                 <div class="input"><label class="input__label" for="medicine_message">
                     <div class="input__label-text"><?=$question['CAPTION']?><?=$question['REQUIRED'] === 'Y' ? ' *' : ''?></div>
-                    <textarea class="input__input" type="text" id="medicine_message" name="medicine_message" value=""></textarea>
+                    <textarea class="input__input" type="text" id="medicine_message" name="form_textarea_<?=$question['STRUCTURE'][0]['ID']?>" value=""></textarea>
                     <div class="input__notification"></div>
                 </label></div>
             </div>
