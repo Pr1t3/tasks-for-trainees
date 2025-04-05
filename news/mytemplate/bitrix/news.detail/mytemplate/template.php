@@ -1,8 +1,12 @@
-<?if(!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED!==true)
+<?
+if(!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED!==true)
 {
     die();
 }
+
+$APPLICATION->SetTitle($arResult["NAME"]);
 ?>
+
 <div class="news-detail">
     <div class="article-card">
         <?if((!isset($arParams["DISPLAY_NAME"]) || $arParams["DISPLAY_NAME"]!="N") && $arResult["NAME"]):?>
@@ -22,7 +26,8 @@
                     <?if($arResult["DETAIL_TEXT"] <> ''):?>
                         <p><?=$arResult["DETAIL_TEXT"]?></p>
                     <?endif;?>
-                    <a class="article-card__button" href="<?=$arResult["LIST_PAGE_URL"]?>">Назад к новостям</a>
+                <a class="article-card__button" href="/news/">Назад к новостям</a>
+                </div>
             </div>
         </div>
     </div>

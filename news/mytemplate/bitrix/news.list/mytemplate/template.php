@@ -1,3 +1,17 @@
+<?php
+if (!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED !== true) {
+    die();
+}
+
+$arSectionItems = array();
+foreach ($arResult["ITEMS"] as $arItem) {
+    if ($arItem["IBLOCK_SECTION_ID"] == $arParams["SECTION_ID"]) {
+        $arSectionItems[] = $arItem;
+    }
+}
+$arResult["ITEMS"] = $arSectionItems;
+?>
+
 <div class="news-list">
     <div id="barba-wrapper">
         <div class="article-list">

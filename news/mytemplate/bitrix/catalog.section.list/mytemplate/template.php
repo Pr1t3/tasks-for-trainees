@@ -1,0 +1,37 @@
+<?php 
+if (!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED !== true) {
+    die();
+}
+
+$curDepthLevel = $arResult['SECTION']["DEPTH_LEVEL"];
+
+$newArSections = array();
+foreach ($arResult["SECTIONS"] as $arSection) {
+    if ($arSection["DEPTH_LEVEL"] == $curDepthLevel + 1) {
+        $newArSections[] = $arSection;
+    }
+}
+$arResult["SECTIONS"] = $newArSections;
+$arResult["SECTIONS_COUNT"] = count($newArSections);
+?>
+
+<div id="barba-wrapper">
+    <div class="article-list">
+    <?php foreach ($arResult["SECTIONS"] as $arSection): ?>
+        <a class="article-item article-list__item" href="<?=$arSection["SECTION_PAGE_URL"]?>" data-anim="anim-3">
+
+        <?php if (is_array($arSection["PICTURE"])): ?>
+            <div class="article-item__background"><img src="<?=$arSection["PICTURE"]["SRC"]?>" alt=""/></div>
+        <?php endif; ?>
+
+            <div class="article-item__wrapper">
+                <div class="article-item__title"><?=$arSection["NAME"]?></div>
+
+                <?php if ($arSection["DESCRIPTION"]): ?>
+                    <div class="article-item__content"><?=$arSection["DESCRIPTION"]?></div>
+                <? endif; ?>
+            </div>		
+        </a>
+    <?php endforeach; ?>
+    </div>
+</div>
