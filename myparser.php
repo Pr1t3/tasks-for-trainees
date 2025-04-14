@@ -53,7 +53,7 @@ function parseCsv($data, $IBLOCK_ID, &$jobTypeMap, &$officeMap, &$locationMap) {
         $elementData["SALARY_VALUE"] = "";
     } elseif ($elementData["SALARY_VALUE"] === "по договоренности") {
         $elementData["SALARY_VALUE"] = "";
-        $elementData["SALARY_TYPE"] = "договорная";
+        $elementData["SALARY_TYPE"] = "Договорная";
     } else {
         $arSalary = explode(" ", $elementData["SALARY_VALUE"]);
         
@@ -71,7 +71,6 @@ function parseCsv($data, $IBLOCK_ID, &$jobTypeMap, &$officeMap, &$locationMap) {
     return $elementData;
 }
 
-$_SERVER["DOCUMENT_ROOT"] = "/home/romap/MainFolder/Job/Only/bitrix-site";
 require_once($_SERVER["DOCUMENT_ROOT"] . "/bitrix/modules/main/include/prolog_before.php");
 \Bitrix\Main\Loader::includeModule("iblock");
 
