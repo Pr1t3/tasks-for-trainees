@@ -1,29 +1,58 @@
 <?php
 
-namespace Only\Site\Agents;
+namespace Dev\Site\Agents;
 
 
 class Iblock
 {
     public static function clearOldLogs()
     {
-        // Здесь напиши свой агент
-    }
+        \Bitrix\Main\Loader::includeModule('iblock');
 
-    public static function example()
-    {
-        global $DB;
-        if (\Bitrix\Main\Loader::includeModule('iblock')) {
-            $iblockId = \Only\Site\Helpers\IBlock::getIblockID('QUARRIES_SEARCH', 'SYSTEM');
-            $format = $DB->DateFormatToPHP(\CLang::GetDateFormat('SHORT'));
-            $rsLogs = \CIBlockElement::GetList(['TIMESTAMP_X' => 'ASC'], [
-                'IBLOCK_ID' => $iblockId,
-                '<TIMESTAMP_X' => date($format, strtotime('-1 months')),
-            ], false, false, ['ID', 'IBLOCK_ID']);
-            while ($arLog = $rsLogs->Fetch()) {
-                \CIBlockElement::Delete($arLog['ID']);
+        $logIBlockId = self::getLogIblockId();
+        if (!$logIBlockId) {
+            return '\\' . __CLASS__ . '::' . __FUNCTION__ . '();';
+        }
+
+        $iBlockElements = self::getLogElements();
+
+        $count = 0;
+        while ($arElem = $iBlockElements->Fetch()) {
+            $arElements[$count] = $arElem;
+            if ($count > 9) {
+                \CIBlockElement::Delete($arElem['ID']);
             }
+            $count++;
         }
         return '\\' . __CLASS__ . '::' . __FUNCTION__ . '();';
+    }
+
+    static function getLogElements() {
+        $iBlockElements = \CIBlockElement::GetList(
+            ['TIMESTAMP_X' => 'DESC'],
+            [
+                'IBLOCK_ID' => $logIBlockId,
+            ],
+            false,
+            false,
+            ['ID']
+        );
+        return $iBlockElements;
+    }
+    
+    static function getLogIblockId() {
+        $logIBlock = \CIBlock::GetList(
+            [],
+            [
+                'CODE' => 'LOG',
+            ],
+            false,
+            false,
+            ['ID']
+            )->Fetch();
+        if ($logIBlock) {
+            return $logIBlock['ID'];
+        }
+        return;
     }
 }

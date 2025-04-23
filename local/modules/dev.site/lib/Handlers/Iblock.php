@@ -1,108 +1,136 @@
 <?php
 
-namespace Only\Site\Handlers;
+namespace Dev\Site\Handlers;
 
 
 class Iblock
 {
-    public function addLog()
+    public static function OnAddIBlockElementAddAndUpdateHandler(&$arFields)
     {
-        // Здесь напиши свой обработчик
-    }
+        \Bitrix\Main\Loader::includeModule("iblock");
 
-    function OnBeforeIBlockElementAddHandler(&$arFields)
-    {
-        $iQuality = 95;
-        $iWidth = 1000;
-        $iHeight = 1000;
-        /*
-         * Получаем пользовательские свойства
-         */
-        $dbIblockProps = \Bitrix\Iblock\PropertyTable::getList(array(
-            'select' => array('*'),
-            'filter' => array('IBLOCK_ID' => $arFields['IBLOCK_ID'])
-        ));
-        /*
-         * Выбираем только свойства типа ФАЙЛ (F)
-         */
-        $arUserFields = [];
-        while ($arIblockProps = $dbIblockProps->Fetch()) {
-            if ($arIblockProps['PROPERTY_TYPE'] == 'F') {
-                $arUserFields[] = $arIblockProps['ID'];
-            }
+        $logIBlockId = self::getLogIblockId();
+
+        $iBlockId = $arFields['IBLOCK_ID'];
+        $iBlockCode = $arFields['IBLOCK_CODE'];
+        $iBlockName = self::getIBlockName($iBlockId);
+        $elementId = $arFields['ID'];
+        $elementCode = $arFields['CODE'];
+        $elementName = $arFields['NAME'];
+        $elementIBlockSectionId = $arFields['IBLOCK_SECTION'][0];
+
+        if ($iBlockId == $logIBlockId) {
+            return;
         }
-        /*
-         * Перебираем и масштабируем изображения
-         */
-        foreach ($arUserFields as $iFieldId) {
-            foreach ($arFields['PROPERTY_VALUES'][$iFieldId] as &$file) {
-                if (!empty($file['VALUE']['tmp_name'])) {
-                    $sTempName = $file['VALUE']['tmp_name'] . '_temp';
-                    $res = \CAllFile::ResizeImageFile(
-                        $file['VALUE']['tmp_name'],
-                        $sTempName,
-                        array("width" => $iWidth, "height" => $iHeight),
-                        BX_RESIZE_IMAGE_PROPORTIONAL_ALT,
-                        false,
-                        $iQuality);
-                    if ($res) {
-                        rename($sTempName, $file['VALUE']['tmp_name']);
-                    }
-                }
-            }
+        
+        $sectionId = self::getSectionId($logIBlockId, $iBlockName, $iBlockCode);     
+
+        if (!isset($elementIBlockSectionId) || empty($elementIBlockSectionId)) {
+            $previewText = $iBlockName . '->' . $elementName;
+        } else {
+            $sectionsString = self::getSections($elementIBlockSectionId);
+            $previewText = $iBlockName . '->' . $sectionsString . '->' . $elementName;
         }
 
-        if ($arFields['CODE'] == 'brochures') {
-            $RU_IBLOCK_ID = \Only\Site\Helpers\IBlock::getIblockID('DOCUMENTS', 'CONTENT_RU');
-            $EN_IBLOCK_ID = \Only\Site\Helpers\IBlock::getIblockID('DOCUMENTS', 'CONTENT_EN');
-            if ($arFields['IBLOCK_ID'] == $RU_IBLOCK_ID || $arFields['IBLOCK_ID'] == $EN_IBLOCK_ID) {
-                \CModule::IncludeModule('iblock');
-                $arFiles = [];
-                foreach ($arFields['PROPERTY_VALUES'] as $id => &$arValues) {
-                    $arProp = \CIBlockProperty::GetByID($id, $arFields['IBLOCK_ID'])->Fetch();
-                    if ($arProp['PROPERTY_TYPE'] == 'F' && $arProp['CODE'] == 'FILE') {
-                        $key_index = 0;
-                        while (isset($arValues['n' . $key_index])) {
-                            $arFiles[] = $arValues['n' . $key_index++];
-                        }
-                    } elseif ($arProp['PROPERTY_TYPE'] == 'L' && $arProp['CODE'] == 'OTHER_LANG' && $arValues[0]['VALUE']) {
-                        $arValues[0]['VALUE'] = null;
-                        if (!empty($arFiles)) {
-                            $OTHER_IBLOCK_ID = $RU_IBLOCK_ID == $arFields['IBLOCK_ID'] ? $EN_IBLOCK_ID : $RU_IBLOCK_ID;
-                            $arOtherElement = \CIBlockElement::GetList([],
-                                [
-                                    'IBLOCK_ID' => $OTHER_IBLOCK_ID,
-                                    'CODE' => $arFields['CODE']
-                                ], false, false, ['ID'])
-                                ->Fetch();
-                            if ($arOtherElement) {
-                                /** @noinspection PhpDynamicAsStaticMethodCallInspection */
-                                \CIBlockElement::SetPropertyValues($arOtherElement['ID'], $OTHER_IBLOCK_ID, $arFiles, 'FILE');
-                            }
-                        }
-                    } elseif ($arProp['PROPERTY_TYPE'] == 'E') {
-                        $elementIds = [];
-                        foreach ($arValues as &$arValue) {
-                            if ($arValue['VALUE']) {
-                                $elementIds[] = $arValue['VALUE'];
-                                $arValue['VALUE'] = null;
-                            }
-                        }
-                        if (!empty($arFiles && !empty($elementIds))) {
-                            $rsElement = \CIBlockElement::GetList([],
-                                [
-                                    'IBLOCK_ID' => \Only\Site\Helpers\IBlock::getIblockID('PRODUCTS', 'CATALOG_' . $RU_IBLOCK_ID == $arFields['IBLOCK_ID'] ? '_RU' : '_EN'),
-                                    'ID' => $elementIds
-                                ], false, false, ['ID', 'IBLOCK_ID', 'NAME']);
-                            while ($arElement = $rsElement->Fetch()) {
-                                /** @noinspection PhpDynamicAsStaticMethodCallInspection */
-                                \CIBlockElement::SetPropertyValues($arElement['ID'], $arElement['IBLOCK_ID'], $arFiles, 'FILE');
-                            }
-                        }
-                    }
-                }
-            }
+
+        $element = new \CIBlockElement;
+        $arFieldsNewElement = [
+            'ACTIVE' => 'Y',
+            'ACTIVE_FROM' => ConvertTimeStamp(time(), 'FULL'),
+            'IBLOCK_ID' => $logIBlockId,
+            'NAME' => $elementId,
+            'CODE' => $elementCode,
+            'IBLOCK_SECTION_ID' => $sectionId,
+            'PREVIEW_TEXT' => $previewText,
+        ];
+
+        $existingElement = \CIBlockElement::GetList(
+            [],
+            [
+                'IBLOCK_ID' => $logIBlockId,
+                'NAME' => $elementId,
+            ],
+            false,
+            false,
+            ['ID']
+        )->Fetch();
+
+        if ($existingElement) {
+            $element->Update($existingElement['ID'], $arFieldsNewElement);
+        } else {
+            $element->Add($arFieldsNewElement);
         }
     }
 
+    static function getSectionId($logIBlockId, $iBlockName, $iBlockCode) {
+        $section = \CIBlockSection::GetList(
+            [],
+            [
+                'IBLOCK_ID' => $logIBlockId,
+                'NAME' => $iBlockName,
+            ],
+            false,
+            false,
+            ['ID']
+        )->Fetch();
+
+        if ($section) {
+            $sectionId = $section['ID'];
+        } else {
+            $section = new \CIBlockSection;
+            $arFieldsNewSection = [
+                'ACTIVE' => 'Y',
+                'IBLOCK_ID' => $logIBlockId,
+                'NAME' => $iBlockName,
+                'CODE' => $iBlockCode,
+            ];
+            $sectionId = $section->Add($arFieldsNewSection);
+            if (!$sectionId) {
+                return;
+            }
+        }
+        return $sectionId;
+    }
+
+    static function getLogIblockId() {
+        $logIBlock = \CIBlock::GetList(
+            [],
+            [
+                'CODE' => 'LOG',
+            ],
+            false,
+            false,
+            ['ID']
+        )->Fetch();   
+        if ($logIBlock) {
+            return $logIBlock['ID'];
+        }
+        return;
+    }
+
+    static function getIBlockName($iBlockId) {
+        $iblock = \CIBlock::GetByID($iBlockId)->GetNext();
+
+        if(!$iblock) {
+            return;
+        }
+        return $iblock['NAME'];
+    }
+
+    static function getSections($iBlockSectionId) {
+        $section = \CIBlockSection::GetById($iBlockSectionId)->Fetch();
+
+        if (!$section) {
+            return '';
+        }
+
+        $iBlockSectionName = $section['NAME'];
+        $iBlockSectionParentId = $section['IBLOCK_SECTION_ID'];
+
+        if (!isset($iBlockSectionParentId) || empty($iBlockSectionParentId)) {
+            return $iBlockSectionName;
+        }
+
+        return self::getSections($iBlockSectionParentId) . '->' . $iBlockSectionName;
+    }
 }
