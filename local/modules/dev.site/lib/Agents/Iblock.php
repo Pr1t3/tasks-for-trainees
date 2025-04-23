@@ -14,7 +14,7 @@ class Iblock
             return '\\' . __CLASS__ . '::' . __FUNCTION__ . '();';
         }
 
-        $iBlockElements = self::getLogElements();
+        $iBlockElements = self::getLogElements($logIBlockId);
 
         $count = 0;
         while ($arElem = $iBlockElements->Fetch()) {
@@ -27,7 +27,7 @@ class Iblock
         return '\\' . __CLASS__ . '::' . __FUNCTION__ . '();';
     }
 
-    static function getLogElements() {
+    static function getLogElements($logIBlockId) {
         $iBlockElements = \CIBlockElement::GetList(
             ['TIMESTAMP_X' => 'DESC'],
             [
