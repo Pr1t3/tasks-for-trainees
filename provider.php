@@ -20,11 +20,10 @@ if (empty($appType)) {
     exit(1);
 }
 
-if ($appType === 'cli')
-{
+if ($appType === 'cli') {
     $cli = new \ConsoleApp\YandexDiskCli($config);
     $cli->execute();
-} else {
+} else if ($appType === 'web') {
     $host = $config['host'] ?? $config['h'] ?? '127.0.0.1';
     $port = $config['port'] ?? $config['p'] ?? 8000;
     $port = intval($port);

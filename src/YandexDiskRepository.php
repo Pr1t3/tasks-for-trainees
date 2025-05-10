@@ -28,9 +28,9 @@ class YandexDiskRepository {
         return $files;
     }
 
-    public function getFile($filePath)
+    public function getFile($fileName)
     {
-        $resource = $this->disk->getResource($filePath);
+        $resource = $this->disk->getResource($fileName);
         $fp = fopen('php://memory', 'r+b');
         $resource->download($fp);
         rewind($fp);
@@ -49,9 +49,9 @@ class YandexDiskRepository {
         fclose($fp);
     }
 
-    public function deleteFile($filePath)
+    public function deleteFile($fileName)
     {
-        $resource = $this->disk->getResource($filePath);
+        $resource = $this->disk->getResource($fileName);
         $resource->delete();
     }
 
