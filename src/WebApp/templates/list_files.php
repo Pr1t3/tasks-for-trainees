@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>List of Files</title>
+</head>
+<body>
+    <h1>List of Files</h1>
+    <ul>
+        <?php
+        $directory = __DIR__ . '/files';
+        foreach ($files as $file) {
+            echo '<li><a href="files?path=' . htmlspecialchars($file['path']) . '" target="_blank">' . htmlspecialchars($file['name']) . '</a></li>';
+        }
+        ?>
+    </ul>
+</body>
+</html>
